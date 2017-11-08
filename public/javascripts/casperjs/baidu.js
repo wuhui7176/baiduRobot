@@ -30,48 +30,64 @@ casper.start('https://www.baidu.com/', function() {
     this.echo(this.getTitle());
 });
 
+//打开登录窗口
+casper.then(function() {
+    this.click("#u1 a.lb");
+    this.wait(1000);
+    this.echo("打开登录窗口成功");
+    this.capture('baidu1.png');
+});
+
+//切换短信登录
+casper.then(function () {
+    this.click("#TANGRAM__PSP_10__smsSwitch")
+    this.wait(1000);
+    this.echo("切换短信登录");
+    this.capture('baidu2.png');
+})
+//填充登录用户
+casper.then(function () {
+    this.fill('form[id="TANGRAM__PSP_10__smsForm"]',{
+        username:tel
+    },false)
+    //发送验证码
+    this.click('#TANGRAM__PSP_10__smsTimer');
+    this.wait(5000);
+    this.echo("填入手机号成功,验证码发送成功");
+    this.capture('baidu3.png');
+})
+var code;
+//获取验证码
 casper.then(function () {
     result = this.evaluate(function(hurl) {
         return JSON.parse(__utils__.sendAJAX(hurl, 'GET', null, false));
     }, {hurl: hurl});
     this.echo(result.r)
-    var code
     for(var i = 0; i < result.data.length; i ++) {
         var  item = result.data[i]
         var  message = item.message;
         if(message.indexOf("百度")>=0){
             code = message.slice(4,11)
+            break
         }
     }
+    this.echo("手机号 -> "+tel+" 验证码 -> "+code)
 })
-//打开登录窗口
-casper.then(function() {
-    this.click("#u1 a.lb");
-    this.wait(1000);
-    // TANGRAM__PSP_3__smsPhone
-    // TANGRAM__PSP_3__smsTimer
-});
-//切换短信登录
+//填充验证码
 casper.then(function () {
-    this.click("#TANGRAM__PSP_10__smsSwitch")
-    this.wait(1000);
+    this.fill('form[id="TANGRAM__PSP_10__smsForm"]',{
+        password:code
+    },false)
+    //登录
+    this.click('#TANGRAM__PSP_10__smsSubmit');
+    this.wait(2000);
+    this.echo("登录成功 -> 截图中")
+
 })
 
-// casper.then(function () {
-//     this.fill('form[id="TANGRAM__PSP_10__smsForm"]',{
-//         username:'17095234740'
-//     },false)
-//     this.click('#TANGRAM__PSP_10__smsTimer');
-//
-//     this.wait(2000);
-//
-// })
-
-
-
-// casper.then(function () {
-//     this.capture('baidu2.png');
-// })
+casper.then(function () {
+    this.capture('baidu2.png');
+})
 
 
 
